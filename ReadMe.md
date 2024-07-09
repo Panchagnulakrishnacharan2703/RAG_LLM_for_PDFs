@@ -12,6 +12,8 @@ RAG-PDF-QA/
 ├── README.md                           # Documentation for the project.
 
 `````
+## Architecture
+![](https://github.com/Panchagnulakrishnacharan2703/RAG_LLM_for_PDFs/blob/main/pics/LLM_ARCHITECTURE.jpg)
 
 ## Features
 * PDF file upload and processing
