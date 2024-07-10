@@ -12,6 +12,8 @@ from langchain_community.chat_models import ChatOllama
 from langchain_core.runnables import RunnablePassthrough
 from langchain.retrievers.multi_query import MultiQueryRetriever
 
+st.set_page_config(layout="wide")
+
 @st.cache_resource()
 def load_pdf(file_path):
     logger.info("Loading PDF from path: %s", file_path)
@@ -80,34 +82,40 @@ def create_chain(_retriever, _llm):
 def main():
     st.title("RAG Model for PDF Question Answering")
     st.header("Upload a PDF file")
-    file_path = st.file_uploader("Select a PDF file", type=["pdf"])
+    
+    col1, col2 = st.columns(2)
 
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
+    with col1:
+        file_path = st.file_uploader("Select a PDF file", type=["pdf"])
 
-    if file_path:
-        logger.info("PDF file uploaded: %s", file_path.name)
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            tmp_file_path = os.path.join(tmp_dir, file_path.name)
-            with open(tmp_file_path, 'wb') as f:
-                f.write(file_path.getbuffer())
-            logger.info("PDF file saved to temporary directory: %s", tmp_file_path)
+        if "chat_history" not in st.session_state:
+            st.session_state.chat_history = []
 
-            data = load_pdf(tmp_file_path)
-            st.write("PDF loaded successfully!")
-            
-            vector_db = create_vector_db(data)
-            st.write("Vector database created successfully!")
-            
-            llm = create_llm("mistral")
-            st.write("LLM model loaded successfully!")
-            
-            retriever = create_retriever(vector_db, llm)
-            st.write("Retriever created successfully!")
-            
-            chain = create_chain(retriever, llm)
-            st.write("Chain created successfully!")
+        if file_path:
+            logger.info("PDF file uploaded: %s", file_path.name)
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                tmp_file_path = os.path.join(tmp_dir, file_path.name)
+                with open(tmp_file_path, 'wb') as f:
+                    f.write(file_path.getbuffer())
+                logger.info("PDF file saved to temporary directory: %s", tmp_file_path)
 
+                data = load_pdf(tmp_file_path)
+                st.write("PDF loaded successfully!")
+                
+                vector_db = create_vector_db(data)
+                st.write("Vector database created successfully!")
+                
+                llm = create_llm("mistral")
+                st.write("LLM model loaded successfully!")
+                
+                retriever = create_retriever(vector_db, llm)
+                st.write("Retriever created successfully!")
+                
+                chain = create_chain(retriever, llm)
+                st.write("Chain created successfully!")
+
+    with col2:
+        if file_path:
             st.header("Ask a question about the PDF")
             question = st.text_input("Enter a question")
 
@@ -119,13 +127,13 @@ def main():
                 logger.info("Answer: %s", answer)
 
             st.header("Chat History")
-            for q, a in st.session_state.chat_history:
+            for q, a in st.session_state.chat_history:  
                 st.write(f"**Question:** {q}")
                 st.write(f"**Answer:** {a}")
 
-    else:
-        st.write("Please upload a PDF file")
-        logger.warning("No PDF file uploaded")
+        else:
+            st.write("Please upload a PDF file")
+            logger.warning("No PDF file uploaded")
 
 if __name__ == "__main__":
     main()
