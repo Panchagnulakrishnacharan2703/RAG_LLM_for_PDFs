@@ -29,20 +29,20 @@ RAG-PDF-QA/
 
 ## How to use
 * Clone the repository: 
-#+BEGIN_SRC bash
+```bash
     git clone https://github.com/yourusername/RAG-PDF-QA.git
     cd RAG-PDF-QA
-#+END_SRC
+```
 
 * Install the required packages:
-#+BEGIN_SRC bash    
+```bash    
     pip install -r requirements.txt
-#+END_SRC
+```
 
 * Run the Streamlit app:
-#+BEGIN_SRC bash    
+```bash    
     streamlit run main.py
-#+END_SRC
+```
 
 * Open the Streamlit app in your browser.
 
