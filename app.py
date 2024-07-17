@@ -11,8 +11,9 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_community.chat_models import ChatOllama
 from langchain_core.runnables import RunnablePassthrough
 from langchain.retrievers.multi_query import MultiQueryRetriever
+import concurrent.futures
 
-st.set_page_config(layout="wide")
+st.set_page_config(page_title="LLM for PDF's 📄", page_icon='🚀', layout="wide")
 
 @st.cache_resource()
 def load_pdf(file_path):
@@ -23,13 +24,16 @@ def load_pdf(file_path):
     return data
 
 @st.cache_resource()
-def create_vector_db(_data):  
+def create_vector_db(_data):
     logger.info("Creating vector database from data")
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=750, chunk_overlap=100)
-    chunks = text_splitter.split_documents(_data)  
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=950, chunk_overlap=25)
+    chunks = text_splitter.split_documents(_data)
+    
+    embedding_model = OllamaEmbeddings(model="nomic-embed-text", show_progress=True)
+    embeddings = embedding_model.embed_documents(chunks)  
     vector_db = Chroma.from_documents(
         documents=chunks,
-        embedding=OllamaEmbeddings(model="nomic-embed-text", show_progress=True),
+        embedding=embedding_model,
         collection_name="local-rag"
     )
     logger.info("Vector database created successfully with %d chunks", len(chunks))
@@ -82,7 +86,6 @@ def create_chain(_retriever, _llm):
 def main():
     st.title("RAG Model for PDF Question Answering")
     st.header("Upload a PDF file")
-    
     col1, col2 = st.columns(2)
 
     with col1:
@@ -101,16 +104,16 @@ def main():
 
                 data = load_pdf(tmp_file_path)
                 st.write("PDF loaded successfully!")
-                
+
                 vector_db = create_vector_db(data)
                 st.write("Vector database created successfully!")
-                
+
                 llm = create_llm("mistral")
                 st.write("LLM model loaded successfully!")
-                
+
                 retriever = create_retriever(vector_db, llm)
                 st.write("Retriever created successfully!")
-                
+
                 chain = create_chain(retriever, llm)
                 st.write("Chain created successfully!")
 
@@ -127,7 +130,7 @@ def main():
                 logger.info("Answer: %s", answer)
 
             st.header("Chat History")
-            for q, a in st.session_state.chat_history:  
+            for q, a in st.session_state.chat_history:
                 st.write(f"**Question:** {q}")
                 st.write(f"**Answer:** {a}")
 
