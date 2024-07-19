@@ -1,5 +1,10 @@
 streamlit
-langchain_community
-langchain_text_splitters
-langchain_core
-logging
+langchain-community
+langchain-text-splitters
+langchain-core
+unstructured
+chromadb
+ollama
+langchain
+pdfminer.six==20201018
+pillow_heif
